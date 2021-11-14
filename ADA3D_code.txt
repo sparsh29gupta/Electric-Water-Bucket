@@ -1,0 +1,45 @@
+#include <Wire.h>  
+#include <SoftwareSerial.h>
+#include<LiquidCrystal.h>
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2); 
+const int sensor=A0; // Assigning analog pin A1 to variable 'sensor'
+float tempc;  //variable to store temperature in degree Celsius
+float vout;  //temporary variable to hold sensor reading
+int pirPin = A1; // for voltage regulator
+int counter = 0;
+int state;
+int laststate = HIGH;
+SoftwareSerial Bluetooth(0,1);     //BT confi
+int BT_input;
+
+void setup()
+{
+Bluetooth.begin(9600);
+pinMode(sensor,INPUT); // Configuring pin A0 as input
+Serial.begin(9600);
+pinMode(pirPin, INPUT);  //A1 for voltage regulator
+lcd.begin(16,2);  
+delay(500);
+}
+void loop() 
+{
+int state = digitalRead(pirPin);    //Volatge regulator
+       if ( state != laststate) {
+                   
+       counter=counter+1;
+       lcd.setCursor(0,1);
+       lcd.print("Temperature:",counter);
+      }
+laststate = state; 
+vout=analogRead(sensor);
+vout=(vout*500)/1023;
+tempc=vout;        // Storing value in Degree Celsius
+lcd.setCursor(0,0);
+lcd.print("in DegreeC= ");
+lcd.print(tempc);
+if (Bluetooth.available())       //BT connectivity
+  {
+    Serial.write(counter,tempc);
+}
+delay(1000); //Delay of 1 second for ease of viewing in serial monitor
+}
